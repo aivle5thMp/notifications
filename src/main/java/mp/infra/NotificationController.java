@@ -7,6 +7,11 @@ import mp.notifications.domain.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+// spring security
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import javax.transaction.Transactional;
 import java.util.*;
 
@@ -20,8 +25,9 @@ public class NotificationController {
     NotificationRepository notificationRepository;
 
     @GetMapping
-    public List<NotificationResponse> getNotifications(@RequestParam String userId) {
-        UUID userUUID = UUID.fromString(userId);
+    @PreAuthorize("isAuthenticated()")
+    public List<NotificationResponse> getNotifications() {
+        UUID userUUID = getCurrentUserId();
         List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(userUUID);
 
         List<NotificationResponse> result = new ArrayList<>();
@@ -38,8 +44,9 @@ public class NotificationController {
     }
 
     @GetMapping("/unread-count")
-    public UnreadCountResponse getUnreadCount(@RequestParam String userId) {
-        UUID userUUID = UUID.fromString(userId);
+    @PreAuthorize("isAuthenticated()")
+    public UnreadCountResponse getUnreadCount() {
+        UUID userUUID = getCurrentUserId();
         List<Notification> unreadNotifications = notificationRepository.findByUserIdAndIsReadFalse(userUUID);
         UnreadCountResponse response = new UnreadCountResponse();
         response.setCount(unreadNotifications.size());
@@ -47,31 +54,42 @@ public class NotificationController {
     }
 
     @PatchMapping("/read")
+    @PreAuthorize("isAuthenticated()")
     public void markAsRead(@RequestBody NotificationIdRequest request) {
+        UUID currentUserId = getCurrentUserId();
         notificationRepository.findById(request.getNotificationId())
             .ifPresent(notification -> {
-                notification.setIsRead(true);
-                notificationRepository.save(notification);
+                // 현재 사용자의 알림인지 확인
+                if (notification.getUserId().equals(currentUserId)) {
+                    notification.setIsRead(true);
+                    notificationRepository.save(notification);
+                } else {
+                    throw new SecurityException("Access denied: Cannot modify other user's notification");
+                }
             });
     }
 
     @PatchMapping("/read-all")
-    public void markAllAsRead(@RequestBody NotificationUserRequest request) {
-        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(request.getUserId());
+    @PreAuthorize("isAuthenticated()")
+    public void markAllAsRead() {
+        UUID userUUID = getCurrentUserId();
+        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(userUUID);
         for (Notification notification : list) {
             notification.setIsRead(true);
         }
         notificationRepository.saveAll(list);
     }
 
-    @Data
-    public static class NotificationIdRequest {
-        private UUID notificationId;
+    private UUID getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // 인증 정보에서 사용자 ID를 추출 (구현에 따라 다를 수 있음)
+        String userId = authentication.getName(); // 또는 authentication.getPrincipal()에서 사용자 ID 추출
+        return UUID.fromString(userId);
     }
 
     @Data
-    public static class NotificationUserRequest {
-        private UUID userId;
+    public static class NotificationIdRequest {
+        private UUID notificationId;
     }
 
     @Data

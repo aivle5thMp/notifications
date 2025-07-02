@@ -1,6 +1,4 @@
-// notification\src\main\java\mp\NotificationApplication.java
-
-package mp.notifications;
+package mp;
 
 import mp.config.kafka.KafkaProcessor;
 import org.springframework.boot.SpringApplication;

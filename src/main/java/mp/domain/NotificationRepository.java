@@ -1,6 +1,4 @@
-// notification\src\main\java\mp\domain\NotificationRepository.java
-
-package mp.notifications.domain;
+package mp.domain;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

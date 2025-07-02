@@ -1,8 +1,7 @@
-// notifications\src\main\java\mp\domain\Notification.java
-package mp.notifications.domain;
+package mp.domain;
 
 import lombok.Data;
-import mp.notifications.NotificationsApplication;
+import mp.NotificationsApplication;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,9 +13,10 @@ import java.util.UUID;
 public class Notification {
 
     @Id
+    @Column(columnDefinition = "UUID")
     private UUID id = UUID.randomUUID(); // UUID 자동 생성
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false, columnDefinition = "UUID")
     private UUID userId;
 
     @Column(columnDefinition = "TEXT", nullable = false)

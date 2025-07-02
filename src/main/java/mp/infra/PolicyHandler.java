@@ -1,11 +1,9 @@
-// notification\src\main\java\mp\infra\PolicyHandler.java
-
-package mp.notifications.infra;
+package mp.infra;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import mp.config.kafka.KafkaProcessor;
-import mp.notifications.domain.Notification;
+import mp.domain.Notification;
 import mp.notifications.external.AuthorServiceClient;
 import mp.domain.BookPublished;
 import mp.domain.AuditCompleted;
@@ -44,6 +42,9 @@ public class PolicyHandler {
         try {
             // authorId로 userId 조회
             UUID authorId = event.getAuthorId();
+            System.out.println("DEBUG - BookPublished authorId: " + authorId);
+            System.out.println("DEBUG - BookPublished authorId class: " + (authorId != null ? authorId.getClass().getName() : "null"));
+            
             AuthorServiceClient.ApiResponse<AuthorServiceClient.UserIdResponse> response = 
                 authorServiceClient.getUserIdByAuthorId(authorId);
             
@@ -53,6 +54,8 @@ public class PolicyHandler {
             }
             
             UUID userId = response.getData().getUserId();
+            System.out.println("DEBUG - BookPublished retrieved userId: " + userId);
+            System.out.println("DEBUG - BookPublished retrieved userId class: " + (userId != null ? userId.getClass().getName() : "null"));
             
             // userId로 알림 생성
             Notification notification = new Notification();
@@ -71,11 +74,15 @@ public class PolicyHandler {
     @StreamListener(KafkaProcessor.AUTHOR_REVIEW_IN)
     public void onAuditCompleted(@Payload AuditCompleted event) {
         System.out.println("AuditCompleted event received: " + event);
+        System.out.println("DEBUG - Raw event toString: " + event.toString());
+        System.out.println("DEBUG - UserId from event: " + event.getUserId());
+        System.out.println("DEBUG - UserId class: " + (event.getUserId() != null ? event.getUserId().getClass().getName() : "null"));
         
         if (event.getUserId() == null || event.getStatus() == null) return;
 
         try {
             UUID userId = event.getUserId();
+            System.out.println("DEBUG - Final userId to save: " + userId);
 
             String message;
             if ("APPROVED".equals(event.getStatus())) {

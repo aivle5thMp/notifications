@@ -1,9 +1,8 @@
-// notification\src\main\java\mp\infra\NotificationController.java
-package mp.notifications.infra;
+package mp.infra;
 
 import lombok.Data;
-import mp.notifications.domain.Notification;
-import mp.notifications.domain.NotificationRepository;
+import mp.domain.Notification;
+import mp.domain.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,9 +81,7 @@ public class NotificationController {
 
     private UUID getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // 인증 정보에서 사용자 ID를 추출 (구현에 따라 다를 수 있음)
-        String userId = authentication.getName(); // 또는 authentication.getPrincipal()에서 사용자 ID 추출
-        return UUID.fromString(userId);
+        return (UUID) authentication.getPrincipal();
     }
 
     @Data

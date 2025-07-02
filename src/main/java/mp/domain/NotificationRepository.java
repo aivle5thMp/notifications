@@ -11,5 +11,6 @@ import java.util.UUID;
 @Repository
 public interface NotificationRepository extends CrudRepository<Notification, UUID> {
     List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<Notification> findByUserIdAndIsReadFalse(UUID userId);
 }
 

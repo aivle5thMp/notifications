@@ -41,13 +41,16 @@ spring:
                 value:
                   serde: org.apache.kafka.common.serialization.Serdes$StringSerde
       bindings:
-        event-in:
+        # 구독할 토픽들 (Consumer)
+        author-review-in:
           group: notifications
-          destination: mp
+          destination: author.review.v1
           contentType: application/json
-        event-out:
-          destination: mp
+        book-published-in:
+          group: notifications
+          destination: book.published.v1
           contentType: application/json
+
 
 logging:
   level:

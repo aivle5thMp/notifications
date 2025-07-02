@@ -12,6 +12,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/notifications")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @Transactional
 public class NotificationController {
 
@@ -19,8 +20,9 @@ public class NotificationController {
     NotificationRepository notificationRepository;
 
     @GetMapping
-    public List<NotificationResponse> getNotifications(@RequestBody NotificationUserRequest request) {
-        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(request.getUserId());
+    public List<NotificationResponse> getNotifications(@RequestParam String userId) {
+        UUID userUUID = UUID.fromString(userId);
+        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(userUUID);
 
         List<NotificationResponse> result = new ArrayList<>();
         for (Notification notification : list) {
@@ -33,6 +35,15 @@ public class NotificationController {
         }
 
         return result;
+    }
+
+    @GetMapping("/unread-count")
+    public UnreadCountResponse getUnreadCount(@RequestParam String userId) {
+        UUID userUUID = UUID.fromString(userId);
+        List<Notification> unreadNotifications = notificationRepository.findByUserIdAndIsReadFalse(userUUID);
+        UnreadCountResponse response = new UnreadCountResponse();
+        response.setCount(unreadNotifications.size());
+        return response;
     }
 
     @PatchMapping("/read")
@@ -69,5 +80,10 @@ public class NotificationController {
         private String message;
         private Boolean isRead;
         private Date createdAt;
+    }
+
+    @Data
+    public static class UnreadCountResponse {
+        private int count;
     }
 }

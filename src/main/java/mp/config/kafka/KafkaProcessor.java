@@ -3,17 +3,17 @@
 package mp.config.kafka;
 
 import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface KafkaProcessor {
-    String INPUT = "event-in";
-    String OUTPUT = "event-out";
 
-    @Input(INPUT)
-    SubscribableChannel inboundTopic();
+    String AUTHOR_REVIEW_IN = "author-review-in";
+    String BOOK_PUBLISHED_IN = "book-published-in";
 
-    @Output(OUTPUT)
-    MessageChannel outboundTopic();
+    @Input(AUTHOR_REVIEW_IN)
+    SubscribableChannel authorReviewIn();
+
+    @Input(BOOK_PUBLISHED_IN)
+    SubscribableChannel bookPublishedIn();
 }
